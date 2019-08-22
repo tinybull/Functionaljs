@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 function splat(fun) {
   return function (array) {
     return fun.apply(null, array);
@@ -41,7 +43,7 @@ function note(thing) {
 }
 
 
-function parseAge(age){
+function parseAge(age) {
   if (!_.isString(age)) fail('Expecting a string');
   var a;
 
@@ -53,6 +55,22 @@ function parseAge(age){
   }
 
   return a;
+}
+
+function isIndexed(data) {
+  return _.isArray(data) || _.isString(data);
+}
+
+
+function nth(a, index) {
+  if (!_.isNumber(index)) fail('Expected a number as the index');
+  if (!isIndexed(a)) fail('Not supported on non-indexed type');
+  if ((index < 0) || (a.length - 1 < index)) fail('Index value is out of bounds');
+  return a[index];
+}
+
+function second(a) {
+  return nth(a, 1);
 }
 
 
@@ -79,6 +97,8 @@ function comparator(pred) {
   };
 }
 
+[100, 1, 0, 10, -1, -2, -1].sort(comparator(lessOrEqual));
+
 function truthy(x) {
   return (x !== false) && existy(x);
 }
@@ -88,3 +108,27 @@ function existy(x) {
 }
 
 [100, 1, 0, 10, -1, -2, -1].sort(comparator(lessOrEqual));
+
+
+function lameCSV(str) {
+  return _.reduce(str.split('\n'), function (table, row) {
+    table.push(_.map(row.split(','), function (c) { return c.trim(); }));
+    return table;
+  }, [])
+}
+
+var peopleTable = lameCSV('name,age,hair\nMerble,3,red\nBob,64,blonde');
+
+_.rest(peopleTable).sort();
+
+function selectNames(table) {
+  return _.rest(_.map(table, _.first));
+}
+
+function selectAges(table) {
+  return _.rest(_.map(table, second));
+}
+
+function selectHairColor(table) {
+  return _.rest(_.map(table, function (row) { return nth(row, 2); }));
+}
